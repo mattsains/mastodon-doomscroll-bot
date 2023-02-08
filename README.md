@@ -1,7 +1,7 @@
 # mastodon-doomscroll-bot
 A bot that posts helpful messages to Mastodon to stop doomscrolling.
 
-It can be followed at <a href="https://masto.ai/@selfcare" rel="self">@selfcare@masto.ai</a>
+It can be followed at <a href="https://masto.ai/@selfcare" rel="me">@selfcare@masto.ai</a>
 
 It posts a reminder to get off social media every twelve hours.
 
