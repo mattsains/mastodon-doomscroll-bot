@@ -3,7 +3,6 @@ use std::{sync::Arc, env};
 use azure_identity::DefaultAzureCredentialBuilder;
 use azure_security_keyvault::SecretClient;
 use rand::seq::SliceRandom;
-use uuid::Uuid;
 
 
 
@@ -15,7 +14,8 @@ async fn main() {
 
     let client = reqwest::Client::new();
 
-    let id = Uuid::new_v4().as_simple().to_string();
+    let date = chrono::offset::Utc::now();
+    let dedupe_key = date.format("%Y-%m-%d-%H").to_string(); // this prevents more than one post an hour.
 
     let message = generate_message();
 
@@ -23,7 +23,7 @@ async fn main() {
 
     let res = client.post("https://masto.ai/api/v1/statuses")
         .bearer_auth(access_token)
-        .header("Idempotency-Key", id)
+        .header("Idempotency-Key", dedupe_key)
         .form(&[("status", message)])
         .send()
         .await.unwrap();
@@ -33,10 +33,13 @@ async fn main() {
     if !res.status().is_success() {
         panic!("Request failed with {}", res.status())
     }
+    println!("The body was:");
+    println!("{}", res.text().await.unwrap_or(String::from("<no body>")));
+    println!("Goodbye");
 }
 
 const MESSAGES: &'static [&'static str] = &[
-    "Have you spent too much time on social media today? Scrolling can be a way to self-sooth, but try something more uplifting, like <ACTIVITY>.",
+    "Have you spent too much time on social media today? Scrolling can be a way to self-soothe, but try something more uplifting, like <ACTIVITY>.",
     "Our free time is precious. Consider <ACTIVITY> instead of using social media.",
     "Do you devote too much time to scrolling Mastodon? Why don't you try <ACTIVITY> instead?",
     "Hello, I know you are doing your best. Why don't you try <ACTIVITY> instead of scrolling on here?",
