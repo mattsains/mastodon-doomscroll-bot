@@ -1,0 +1,11 @@
+version = 0.1
+[beta]
+[beta.deploy]
+[beta.deploy.parameters]
+stack_name = "doomscroll-beta"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-u1lpoq0vcekr"
+s3_prefix = "doomscroll-beta"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []

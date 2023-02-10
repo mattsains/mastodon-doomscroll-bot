@@ -1,44 +1,36 @@
-use std::{sync::Arc, env};
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 
-use azure_identity::DefaultAzureCredentialBuilder;
-use azure_security_keyvault::SecretClient;
-use rand::seq::SliceRandom;
+export const post = async (event, context) => {
+    console.log("Starting post")
+    const accessKey = await getSecret();
 
+    const d = new Date();
+    const dedupeId = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + "-" + d.getHours();
+    const message = generate_message();
 
+    console.log("Dedupe ID:", dedupeId);
+    console.log("Decided to post:", message);
 
-#[tokio::main]
-async fn main() {
+    const data = new URLSearchParams();
+    data.append("status", message);
 
-    println!("Hello, world!");
-    let access_token = get_secret("accesstoken").await;
+    const response = await fetch("https://masto.ai/api/v1/statuses", {
+        method: 'post',
+        headers: {
+            "Authorization": "Bearer " + accessKey,
+            "Idempotency-Key": dedupeId,
+        },
+        body: data,
+    });
 
-    let client = reqwest::Client::new();
+    console.log("Response:", response.body)
 
-    let date = chrono::offset::Utc::now();
-    let dedupe_key = date.format("%Y-%m-%d-%H").to_string(); // this prevents more than one post an hour.
-
-    let message = generate_message();
-
-    println!("Chosen to post '{}'", message);
-
-    let res = client.post("https://masto.ai/api/v1/statuses")
-        .bearer_auth(access_token)
-        .header("Idempotency-Key", dedupe_key)
-        .form(&[("status", message)])
-        .send()
-        .await.unwrap();
-
-    println!("{:#?}", res);
-
-    if !res.status().is_success() {
-        panic!("Request failed with {}", res.status())
+    if (response.status !== 200) {
+        throw new Error("Mastodon request failed.");
     }
-    println!("The body was:");
-    println!("{}", res.text().await.unwrap_or(String::from("<no body>")));
-    println!("Goodbye");
 }
 
-const MESSAGES: &'static [&'static str] = &[
+const MESSAGES = [
     "Have you spent too much time on social media today? Scrolling can be a way to self-soothe, but try something more uplifting, like <ACTIVITY>.",
     "Our free time is precious. Consider <ACTIVITY> instead of using social media.",
     "Do you devote too much time to scrolling Mastodon? Why don't you try <ACTIVITY> instead?",
@@ -56,7 +48,7 @@ const MESSAGES: &'static [&'static str] = &[
     "Make sure you control the apps you use and not the other way around."
 ];
 
-const BETTER_ACTIVITIES: &'static [&'static str] = &[
+const BETTER_ACTIVITIES = [
     "reading a book",
     "texting a friend",
     "making yourself a healthy snack",
@@ -74,18 +66,25 @@ const BETTER_ACTIVITIES: &'static [&'static str] = &[
     "getting ice cream"
 ];
 
-fn generate_message() -> String {
-    let mut message = String::from(*MESSAGES.choose(&mut rand::thread_rng()).unwrap());
-    if message.contains("<ACTIVITY>") {
-        let activity = BETTER_ACTIVITIES.choose(&mut rand::thread_rng()).unwrap();
-        message = message.replace("<ACTIVITY>", activity);
+const generate_message = () => {
+    let message = MESSAGES[Math.floor(Math.random()*MESSAGES.length)];
+    if (message.includes("<ACTIVITY>")) {
+        let activity = BETTER_ACTIVITIES[Math.floor(Math.random()*BETTER_ACTIVITIES.length)];
+        message = message.replaceAll("<ACTIVITY>", activity);
     }
-    message
+    return message
 }
 
-async fn get_secret(secret_name: &str) -> String {
-    let keyvault_url = env::var("KEYVAULT_URL").expect("KEYVAULT_URL env variable not set!");
-    let creds = Arc::new(DefaultAzureCredentialBuilder::new().build());
-    let client = SecretClient::new(&keyvault_url, creds).unwrap();
-    client.get(secret_name).await.unwrap().value
+const getSecret = async () => {
+    const client = new SecretsManagerClient({ region: "us-east-1" });
+    const command = new GetSecretValueCommand({
+        SecretId: process.env['SECRET_ID'],
+    });
+    const result = await client.send(command);
+
+    if (!result.SecretString) {
+        throw new Error("Access key not retrieved successfully")
+    }
+    
+    return result.SecretString;
 }
