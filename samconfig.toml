@@ -9,3 +9,14 @@ region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
+
+[prod]
+[prod.deploy]
+[prod.deploy.parameters]
+stack_name = "doomscroll"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-u1lpoq0vcekr"
+s3_prefix = "doomscroll-beta"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []

@@ -3,6 +3,19 @@
 
 # The AWSTemplateFormatVersion identifies the capabilities of the template
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/format-version-structure.html
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Parameter for getting the deployment stage
+
+Mappings:
+  SecretNameMap:
+    beta:
+      SecretId: "doomscroll-beta-accesstoken"
+    prod:
+      SecretId: "doomscroll-accesstoken"
+
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   doomscrollbot
@@ -35,7 +48,20 @@ Resources:
             Schedule: rate(12 hours)
       MemorySize: 128
       Timeout: 100
-      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/doomscroll-bot-role-qu9xr4iy"
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn:
+              Fn::Join:
+              - ""
+              - - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:"
+                - Fn::FindInMap:
+                  - SecretNameMap
+                  - Ref: Stage
+                  - SecretId
+                - "-*"
       Environment:
         Variables:
-          SECRET_ID: 
+          SECRET_ID: !FindInMap
+            - SecretNameMap
+            - Ref: Stage
+            - SecretId

@@ -23,7 +23,7 @@ export const post = async (event, context) => {
         body: data,
     });
 
-    console.log("Response:", response.body)
+    console.log("Response:", response.text())
 
     if (response.status !== 200) {
         throw new Error("Mastodon request failed.");
