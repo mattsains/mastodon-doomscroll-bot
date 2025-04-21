@@ -34,9 +34,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: A Lambda function that posts to Mastodon every twelve hours
-      Runtime: nodejs18.x
+      Runtime: nodejs22.x
       Architectures:
-        - x86_64
+        - arm64
       Handler: src/handlers/scheduled-event-logger.post
       # This property associates this Lambda function with a scheduled CloudWatch Event. For all available properties, see
       # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#schedule

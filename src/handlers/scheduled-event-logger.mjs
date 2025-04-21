@@ -23,7 +23,7 @@ export const post = async (event, context) => {
         body: data,
     });
 
-    console.log("Response:", response.text())
+    console.log("Response:", await response.text())
 
     if (response.status !== 200) {
         throw new Error("Mastodon request failed.");
@@ -45,7 +45,17 @@ const MESSAGES = [
     "Leave social media for the politicians and the chronically angry. You might have a better time <ACTIVITY>.",
     "There's nothing wrong with using this app, but have you considered <ACTIVITY> instead?",
     "Hey! Maybe you could take a break?",
-    "Make sure you control the apps you use and not the other way around."
+    "Make sure you control the apps you use and not the other way around.",
+    "The next scroll won't change the world—but taking action might! Go do something that lifts you up, like <ACTIVITY>.",
+    "Social media will be here when you get back. Why not try <ACTIVITY> before you return?",
+    "If the news feels overwhelming, take a walk, call a friend, or try <ACTIVITY>.",
+    "You control where your attention goes - why not put it toward something that nourishes you? Like <ACTIVITY>.",
+    "The world is waiting for you. Put down your phone and try <ACTIVITY>.",
+    "The world is happening right now. Step outside and be a part of it!",
+    "Social media can wait - your happiness can't. Go do something that makes you smile.",
+    "Your life isn't measured in likes. Make today about real experiences instead.",
+    "Trade doomscrolling for daydreaming - what's something wonderful you could plan for yourself?",
+    "The best stories aren't found online - they're made in real life. Go make one today!"
 ];
 
 const BETTER_ACTIVITIES = [
@@ -63,7 +73,14 @@ const BETTER_ACTIVITIES = [
     "getting some exercise for fun",
     "doing a craft project",
     "going out and buying yourself a small treat",
-    "getting ice cream"
+    "getting ice cream",
+    "calling a friend and have a real conversation",
+    "finding a new recipe and cooking something delicious",
+    "writing down five things you're grateful for",
+    "picking up a craft project and creating something with your hands",
+    "taking a minute to stretch, breathe, and give your body some love",
+    "visiting a local park and enjoying nature",
+    "journaling your own thoughts instead of scrolling through those of others",
 ];
 
 const generate_message = () => {

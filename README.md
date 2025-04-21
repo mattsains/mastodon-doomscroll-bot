@@ -9,3 +9,6 @@ Contributions welcome.
 
 ## How to run
 The bot requires an Azure KeyVault with a secret called "accesstoken" which is a bearer token to post a status update on masto.ai. The KeyVault URL must be set using the environment variable "KEYVAULT_URL".
+
+## How to deploy
+Run `sam deploy --config-env beta`, or replace beta with prod.
